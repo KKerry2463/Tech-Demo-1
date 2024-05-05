@@ -9,10 +9,7 @@ public class playerController : MonoBehaviour
 
     private float horizontal; // Horizontal Input ref
 
-    private bool isFacingRight = true; // Take a guess.
-
-     public bool isOnPlatform; // is the player on a platform bool.
-     public Rigidbody2D platformRb; // reference to moving platform
+    private bool isFacingRight = true; // Take a guess!
 
     [SerializeField] private float speed = 8f; // Horizontal Speed
     [SerializeField] private float jumpPower = 16f; // Vertical jump strenght
@@ -39,19 +36,7 @@ public class playerController : MonoBehaviour
     }
     private void FixedUpdate()
     {
-        if (isOnPlatform) // is the player on a platform?
-        {
-            rb.velocity = new Vector2(horizontal + platformRb.velocity.x * speed, rb.velocity.y); // change the horizontal to platform movespeed.
-        }
-        else
-        {
-            rb.velocity = new Vector2(horizontal * speed, rb.velocity.y); // change the horizontal movespeed.
-        }
-
-
-
-
-        rb.velocity = new Vector2(horizontal * speed, rb.velocity.y); // change the horizontal movespeed.
+         rb.velocity = new Vector2(horizontal * speed, rb.velocity.y); // change the horizontal movespeed.
     }
     private void Flip() // the so called flip method
     {
