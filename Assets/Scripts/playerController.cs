@@ -14,10 +14,14 @@ public class playerController : MonoBehaviour
     [SerializeField] private float speed = 8f; // Horizontal Speed
     [SerializeField] private float jumpPower = 16f; // Vertical jump strenght
 
+    public bool isThrown = false; // Check if something if thrown.
+    [SerializeField] private GameObject boomerang; // refernce to boomerang
+    [SerializeField] private Transform throwingArm; //Empty object used to throw things from.
+
     [SerializeField] private Rigidbody2D rb;            // Rigidbody refernce
     [SerializeField] private Transform groundCheck;     // groundchecker refernce
     [SerializeField] private LayerMask groundLayer;     // grounlayer refernce
-    
+
     private void Update()
     {
         horizontal = Input.GetAxisRaw("Horizontal"); //Set horizontal float off raw input axis.
@@ -33,10 +37,15 @@ public class playerController : MonoBehaviour
         }
 
         Flip(); // Call flip method
+
+        if (Input.GetMouseButtonDown(0) && !isThrown) // if left click and nothing is thrown then
+        {
+            throwObject(); // throw method time...
+        }
     }
     private void FixedUpdate()
     {
-         rb.velocity = new Vector2(horizontal * speed, rb.velocity.y); // change the horizontal movespeed.
+        rb.velocity = new Vector2(horizontal * speed, rb.velocity.y); // change the horizontal movespeed.
     }
     private void Flip() // the so called flip method
     {
@@ -51,5 +60,11 @@ public class playerController : MonoBehaviour
     private bool IsGrounded() // Mythical is grounded method, No mum dont ground me!
     {
         return Physics2D.OverlapCircle(groundCheck.position, 0.2f, groundLayer); // Returns like this "Physics2D.OverlapCircle(groundCheck.position, 0.2f, groundLayer)" Yeah I know I am genuis.
+    }
+
+    void throwObject()
+    {
+        Instantiate(boomerang, throwingArm.position, throwingArm.rotation);
+        isThrown = true;
     }
 }
