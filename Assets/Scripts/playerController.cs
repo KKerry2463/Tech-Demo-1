@@ -15,7 +15,7 @@ public class playerController : MonoBehaviour
     [SerializeField] private float speed = 8f; // Horizontal Speed
     [SerializeField] private float jumpPower = 16f; // Vertical jump strenght
 
-    [HideInInspector]public bool isThrown = false; // Check if something if thrown.
+    [HideInInspector] public bool isThrown = false; // Check if something if thrown.
     public GameObject boomerang; // refernce to boomerang
 
     private bool jetpackActive = false;
@@ -24,8 +24,11 @@ public class playerController : MonoBehaviour
 
     [SerializeField] private Rigidbody2D rb;            // Rigidbody refernce
     [SerializeField] private Transform groundCheck;     // groundchecker refernce
-    [SerializeField] private LayerMask groundLayer;     // grounlayer refernce
-    
+    [SerializeField] private LayerMask groundLayer;     // grounlayer refernce  
+
+    private bool onMovingPlatform = false;
+    private GameObject movingPlatformObject;
+    private Vector2 movingPlatformPreviousPosition;
 
     private void Update()
     {
@@ -48,10 +51,24 @@ public class playerController : MonoBehaviour
             throwObject(); // throw method time...
         }
 
+        if (onMovingPlatform)
+        {
+            Vector2 platformDelta = (Vector2)movingPlatformObject.transform.position - movingPlatformPreviousPosition;
+            rb.position += platformDelta;
+        }
+
+        movingPlatformPreviousPosition = movingPlatformObject.transform.position;
     }
     private void FixedUpdate()
     {
-        rb.velocity = new Vector2(horizontal * speed, rb.velocity.y); // change the horizontal movespeed.
+        if (!onMovingPlatform)
+        {
+            rb.velocity = new Vector2(horizontal * speed, rb.velocity.y); // change the horizontal movespeed.
+        }
+        else
+        {
+            rb.velocity = new Vector2(horizontal * speed + (movingPlatformObject.transform.position.x - movingPlatformPreviousPosition.x) / Time.fixedDeltaTime, rb.velocity.y); // Adjust player velocity according to platform velocity
+        }
     }
     private void Flip() // the so called flip method
     {
@@ -82,11 +99,30 @@ public class playerController : MonoBehaviour
     private void OnTriggerEnter2D(Collider2D collision)
     {
         Jetpack jetpack = collision.gameObject.GetComponent<Jetpack>();
+
         if (jetpack != null)
         {
             jetpackActive = true;
             jetpackVisual.SetActive(jetpackActive);
             Destroy(jetpack.gameObject);
+        }
+
+        MovingPlatform movingPlatform = collision.gameObject.GetComponent<MovingPlatform>();
+
+        if (movingPlatform != null)
+        {
+            onMovingPlatform = true;
+            movingPlatformObject = movingPlatform.gameObject;
+            movingPlatformPreviousPosition = movingPlatformObject.transform.position;
+        }
+    }
+    private void OnTriggerExit2D(Collider2D collision)
+    {
+        MovingPlatform movingPlatform = collision.gameObject.GetComponent<MovingPlatform>();
+        if (movingPlatform != null)
+        {
+            onMovingPlatform = false;
+            movingPlatformObject = null;
         }
     }
 }
