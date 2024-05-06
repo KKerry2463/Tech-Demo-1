@@ -15,8 +15,7 @@ public class playerController : MonoBehaviour
     [SerializeField] private float jumpPower = 16f; // Vertical jump strenght
 
     public bool isThrown = false; // Check if something if thrown.
-    [SerializeField] private GameObject boomerang; // refernce to boomerang
-    [SerializeField] private Transform throwingArm; //Empty object used to throw things from.
+    public GameObject boomerang; // refernce to boomerang
 
     [SerializeField] private Rigidbody2D rb;            // Rigidbody refernce
     [SerializeField] private Transform groundCheck;     // groundchecker refernce
@@ -64,7 +63,12 @@ public class playerController : MonoBehaviour
 
     void throwObject()
     {
-        Instantiate(boomerang, throwingArm.position, throwingArm.rotation);
+        boomerang.SetActive(true); // Activate the boomerang
+
+        Vector2 mousePosition = Camera.main.ScreenToWorldPoint(Input.mousePosition); // Get the mouse position in world coordinates
+        boomerang.GetComponent<boomerang>().destination = mousePosition;
+        boomerang.GetComponent<boomerang>().SetPlayer(gameObject);  // Set the player game object in the boomeran
+        boomerang.GetComponent<boomerang>().transform.position = gameObject.transform.position;
         isThrown = true;
     }
 }
