@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Net.Http.Headers;
 using Unity.VisualScripting;
 using UnityEngine;
@@ -14,12 +15,17 @@ public class playerController : MonoBehaviour
     [SerializeField] private float speed = 8f; // Horizontal Speed
     [SerializeField] private float jumpPower = 16f; // Vertical jump strenght
 
-    public bool isThrown = false; // Check if something if thrown.
+    [HideInInspector]public bool isThrown = false; // Check if something if thrown.
     public GameObject boomerang; // refernce to boomerang
+
+    private bool jetpackActive = false;
+    [SerializeField] private float jetpackBoost = 30f; // jetpack boost force
+    [SerializeField] private GameObject jetpackVisual; // visual jetpack element
 
     [SerializeField] private Rigidbody2D rb;            // Rigidbody refernce
     [SerializeField] private Transform groundCheck;     // groundchecker refernce
     [SerializeField] private LayerMask groundLayer;     // grounlayer refernce
+    
 
     private void Update()
     {
@@ -30,9 +36,9 @@ public class playerController : MonoBehaviour
             rb.velocity = new Vector2(rb.velocity.x, jumpPower); // change Y of rigidbody to our jumpPower
         }
 
-        if (Input.GetButtonDown("Jump") && rb.velocity.y > 0f) // Is the player holding Jump while out velocity is above 0?
+        if (Input.GetButtonDown("Jump") && rb.velocity.y > 0.1f && jetpackActive) // Is the player holding Jump while velocity is above 0
         {
-            rb.velocity = new Vector2(rb.velocity.x, rb.velocity.y * 0.5f); // Add some extra force to the Y, Hold button go higher slightly.
+            rb.AddForce(rb.transform.up * jetpackBoost, ForceMode2D.Impulse);
         }
 
         Flip(); // Call flip method
@@ -41,6 +47,7 @@ public class playerController : MonoBehaviour
         {
             throwObject(); // throw method time...
         }
+
     }
     private void FixedUpdate()
     {
@@ -70,5 +77,16 @@ public class playerController : MonoBehaviour
         boomerang.GetComponent<boomerang>().SetPlayer(gameObject);  // Set the player game object in the boomeran
         boomerang.GetComponent<boomerang>().transform.position = gameObject.transform.position;
         isThrown = true;
+    }
+
+    private void OnTriggerEnter2D(Collider2D collision)
+    {
+        Jetpack jetpack = collision.gameObject.GetComponent<Jetpack>();
+        if (jetpack != null)
+        {
+            jetpackActive = true;
+            jetpackVisual.SetActive(jetpackActive);
+            Destroy(jetpack.gameObject);
+        }
     }
 }
