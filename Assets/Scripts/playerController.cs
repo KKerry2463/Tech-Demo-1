@@ -18,13 +18,13 @@ public class playerController : MonoBehaviour
     [HideInInspector] public bool isThrown = false; // Check if something if thrown.
     public GameObject boomerang; // refernce to boomerang
 
-    private bool jetpackActive = false;
-    [SerializeField] private float jetpackBoost = 30f; // jetpack boost force
+    [SerializeField] private float jetpackBoost = 0.1f;
     [SerializeField] private GameObject jetpackVisual; // visual jetpack element
+    private bool jetpackActive;
 
     [SerializeField] private Rigidbody2D rb;            // Rigidbody refernce
     [SerializeField] private Transform groundCheck;     // groundchecker refernce
-    [SerializeField] private LayerMask groundLayer;     // grounlayer refernce  
+    [SerializeField] private LayerMask groundLayer;     // grounlayer refernce
 
     private bool onMovingPlatform = false;
     private GameObject movingPlatformObject;
@@ -39,10 +39,6 @@ public class playerController : MonoBehaviour
             rb.velocity = new Vector2(rb.velocity.x, jumpPower); // change Y of rigidbody to our jumpPower
         }
 
-        if (Input.GetButtonDown("Jump") && rb.velocity.y > 0.1f && jetpackActive) // Is the player holding Jump while velocity is above 0
-        {
-            rb.AddForce(rb.transform.up * jetpackBoost, ForceMode2D.Impulse);
-        }
 
         Flip(); // Call flip method
 
@@ -51,13 +47,15 @@ public class playerController : MonoBehaviour
             throwObject(); // throw method time...
         }
 
-        if (onMovingPlatform)
+        if (onMovingPlatform && movingPlatformObject != null) // Added null check for movingPlatformObject
         {
             Vector2 platformDelta = (Vector2)movingPlatformObject.transform.position - movingPlatformPreviousPosition;
             rb.position += platformDelta;
         }
-
-        movingPlatformPreviousPosition = movingPlatformObject.transform.position;
+        if (movingPlatformObject != null) // Added null check for movingPlatformObject
+        {
+            movingPlatformPreviousPosition = movingPlatformObject.transform.position; // Moved this line to ensure it's only executed if movingPlatformObject is not null
+        }
     }
     private void FixedUpdate()
     {
@@ -68,6 +66,10 @@ public class playerController : MonoBehaviour
         else
         {
             rb.velocity = new Vector2(horizontal * speed + (movingPlatformObject.transform.position.x - movingPlatformPreviousPosition.x) / Time.fixedDeltaTime, rb.velocity.y); // Adjust player velocity according to platform velocity
+        }
+        if (Input.GetMouseButton(1) && jetpackActive)
+        { 
+            rb.AddForce(rb.transform.up * jetpackBoost);
         }
     }
     private void Flip() // the so called flip method
@@ -104,7 +106,7 @@ public class playerController : MonoBehaviour
         {
             jetpackActive = true;
             jetpackVisual.SetActive(jetpackActive);
-            Destroy(jetpack.gameObject);
+            jetpack.gameObject.SetActive(false);
         }
 
         MovingPlatform movingPlatform = collision.gameObject.GetComponent<MovingPlatform>();
